@@ -216,7 +216,6 @@ plot(lasso.fit, xvar = "lambda")
 ```{r}
 library(glmnet) 
 library(pls)
-set.seed(100)
 ```
 
 ## Data Preparation
@@ -322,8 +321,6 @@ MSPE[2] = mean((Y[test.id] - Ytest.pred)^2)
 best.lam = cv.out$lambda.1se
 Ytest.pred = predict(cv.out, s = best.lam, newx = X[test.id, ])
 MSPE[3] = mean((Y[test.id] - Ytest.pred)^2)
-
-plot(cv.out)
 ```
 
 ```{r}
@@ -342,10 +339,11 @@ ridge_regression = function(X, Y, lambda.seq, test.id){
 ```
 
 
-In your submission, **choose your lambda sequence based on one or two traing-and-test splits, and then stick to that sequence for all 50 iterations.**
+In your submission, **choose your lambda sequence based on one or two training-and-test splits, and then stick to that sequence for all 50 iterations.**
 
 **Choosing lambda sequence**
 
+We take a large lambda range and try 10 training-and-test splits on this range, choosing a range from -1 below the minimum lambda_min value and +1 above the maximum lambda_1se value. 
 ```{r}
 lambdas = matrix(nrow=10, ncol = 2)
 for(i in 1:nrow(lambdas)){
@@ -405,7 +403,7 @@ lasso_regression = function(X, Y, test.id){
   
   mylasso.coef = predict(cv.out, s = best.lam, type = "coefficients")
   var.sel = row.names(mylasso.coef)[which(mylasso.coef != 0)[-1]]
-  mylasso.refit = lm(Y ~ ., myData[, c("Y", var.sel)])
+  mylasso.refit = lm(Y ~ ., myData[-test.id, c("Y", var.sel)])
   Ytest.pred = predict(mylasso.refit, newdata = myData[test.id, ])
   L_Refit = mean((Ytest.pred - Y[test.id])^2)
   
@@ -444,14 +442,14 @@ princomp_regression = function(myData, test.id){
   CVerr = RMSEP(mypcr)$val[1, , ]
   adjCVerr = RMSEP(mypcr)$val[2, , ]
   best.ncomp = which.min(CVerr) - 1 
-  best.ncomp
   
   if (best.ncomp==0) {
       Ytest.pred = mean(myData$Y[-test.id])
     } else {
       Ytest.pred = predict(mypcr, myData[test.id,], ncomp=best.ncomp)
     }
-  mean((Ytest.pred - myData$Y[test.id])^2)
+
+  return(mean((Ytest.pred - myData$Y[test.id])^2))
 }
 ```
 
@@ -465,21 +463,20 @@ MSPE
 ## Simulation
 ### BostonData2
 ```{r}
-MPSE = matrix(nrow = T, ncol = 7)
-colnames(MPSE) = c("Full", "R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
-for(t in 1:50){
+MSPE = matrix(nrow = T, ncol = 7)
+colnames(MSPE) = c("Full", "R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
+for(t in 1:T){
   test.id = all.test.id[,t] 
-  data = myData[-test.id,]
-  MPSE[t, 1] = full_model(data, test.id)
-  MPSE[t, 2:3] = ridge_regression(X, Y, ridge.lambda.seq, test.id)
-  MPSE[t, 4:6] = lasso_regression(X, Y, test.id)
-  MPSE[t, 7] = princomp_regression(data, test.id)
+  MSPE[t, 1] = full_model(myData, test.id)
+  MSPE[t, 2:3] = ridge_regression(X, Y, ridge.lambda.seq, test.id)
+  MSPE[t, 4:6] = lasso_regression(X, Y, test.id)
+  MSPE[t, 7] = princomp_regression(myData, test.id)
 }
 ```
 
 
 ```{r}
-boxplot(MPSE)
+boxplot(MSPE)
 ```
 
 ### BostonData3
@@ -493,19 +490,18 @@ Y = myData[,1]
 ```
 
 ```{r}
-MPSE = matrix(nrow = T, ncol = 6)
-colnames(MPSE) = c("R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
-for(t in 1:50){
+MSPE = matrix(nrow = T, ncol = 6)
+colnames(MSPE) = c("R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
+for(t in 1:T){
   test.id = all.test.id[,t] 
-  data = myData[-test.id,]
-  MPSE[t, 1:2] = ridge_regression(X, Y, ridge.lambda.seq, test.id)
-  MPSE[t, 3:5] = lasso_regression(X, Y, test.id)
-  MPSE[t, 6] = princomp_regression(data, test.id)
+  MSPE[t, 1:2] = ridge_regression(X, Y, ridge.lambda.seq, test.id)
+  MSPE[t, 3:5] = lasso_regression(X, Y, test.id)
+  MSPE[t, 6] = princomp_regression(myData, test.id)
 }
 ```
 
 ```{r}
-boxplot(MPSE)
+boxplot(MSPE)
 ```
 
 

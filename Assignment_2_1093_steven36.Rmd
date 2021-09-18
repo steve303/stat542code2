@@ -315,6 +315,7 @@ Based on the CV plot, we have to keep decreasing lambda values. Eventually, we u
 mylasso.lambda.seq = exp(seq(-10, -2, length.out = 100))
 cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, 
                    lambda = mylasso.lambda.seq)
+best.lam = cv.out$lambda.min
 Ytest.pred = predict(cv.out, s = best.lam, newx = X[test.id, ])
 MSPE[2] = mean((Y[test.id] - Ytest.pred)^2)
 
@@ -328,6 +329,7 @@ ridge_regression = function(X, Y, lambda.seq, test.id){
   mylasso.lambda.seq = lambda.seq
   cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, 
                      lambda = mylasso.lambda.seq)
+  best.lam = cv.out$lambda.min
   Ytest.pred = predict(cv.out, s = best.lam, newx = X[test.id, ])
   R_min = mean((Y[test.id] - Ytest.pred)^2)
   

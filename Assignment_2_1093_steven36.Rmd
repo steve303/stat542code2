@@ -12,6 +12,15 @@ output:
     toc_float: yes
 date: "02/05/2021"
 ---
+# Team Members and Contributions (all MCS)
+Steve Su (steven36)
+
+
+Pierson Wodarz (wodarz2)
+
+
+Steve completed Part I, while Pierson completed Part II. Both reviewed the work of each other for understanding, corrections, and potential improvements. Feedback was provided to each other over calls, while updates to the parts were made by the respective team members. 
+
 # Part I
 ## Load Data
 
@@ -347,10 +356,10 @@ In your submission, **choose your lambda sequence based on one or two training-a
 **Choosing lambda sequence**
 
 We take two random T and ensure that the lambda sequence is reasonable for these splits, for use in the remainder of the iterations.
-We find that for T = 2, a range -12 to 1 captures the minimum of the curve:
+We find that for T = 2, a range -12 to -3 captures the minimum of the curve:
 ```{r}
 test.id = all.test.id[,2]
-test.lambda.seq = exp(seq(-12, 1, length.out = 100))
+test.lambda.seq = exp(seq(-12, -3, length.out = 100))
 cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, lambda = test.lambda.seq)
 sum(cv.out$lambda < cv.out$lambda.min)
 ```
@@ -358,7 +367,7 @@ sum(cv.out$lambda < cv.out$lambda.min)
 Taking another example, T = 9, we find that -12 to 1 also captures the minimum, so we decide to use this range for our lambda sequence. 
 ```{r}
 test.id = all.test.id[,9]
-test.lambda.seq = exp(seq(-12, 1, length.out = 100))
+test.lambda.seq = exp(seq(-12, -3, length.out = 100))
 cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, lambda = test.lambda.seq)
 plot(cv.out)
 
@@ -495,6 +504,25 @@ X = data.matrix(myData[,-1])
 Y = myData[,1]  
 ```
 
+We take We take another observation of the cv plot to determine the appropriate lambda sequence for this dataset. 
+We note that our initial range -12 to -3 does not capture the minimum of the curve for T=1:
+```{r}
+test.id = all.test.id[,2]
+test.lambda.seq = exp(seq(-12, -3, length.out = 100))
+cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, lambda = test.lambda.seq)
+plot(cv.out)
+```
+
+Taking another example, T = 2, we find that -6 to 3 appears to capture the minimum, so we decide to use this range for our lambda sequence. 
+```{r}
+test.id = all.test.id[,9]
+test.lambda.seq = exp(seq(-6, 3, length.out = 100))
+cv.out = cv.glmnet(X[-test.id, ], Y[-test.id], alpha = 0, lambda = test.lambda.seq)
+plot(cv.out)
+
+ridge.lambda.seq = test.lambda.seq
+```
+
 ```{r}
 MSPE = matrix(nrow = T, ncol = 6)
 colnames(MSPE) = c("R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
@@ -512,19 +540,18 @@ boxplot(MSPE)
 
 
 ### Discussion
-Some points to discuss:
 
-* Expectation before running the study and why
+* Expectations
     +  For BostonData2, 78 predictors are quadratic terms of the 12 numerical predictors, and pairwise interactions between the 12 numerical predictors. As such, some of the features may not have predictive power, or have a high correlation with other predictors. The same is true for BostonData3; especially so considering the inclusion of 500 noisy features, which we know have no predictive power.
     + We would expect that the full model would perform the worst since the full model contains all features. Including all features (given what we know about them) could result in overfitting of the training data and lower performance on the testing data. 
     + From 'An Introduction to Statistical Learning with Applications in R' we "might expect the lasso to perform better in a setting where a relatively small number of predictors have substantial coefficients, and the remaining predictors have coefficients that are very small or that equal zero. Ridge regression will perform better when the response is a function of many predictors, all with coefficients of roughly equal size." 
     + It is difficult, therefore, to make a prediction on BostonData2 of the performance of Ridge vs Lasso because we don't know which coefficients are small or zero a priori. However, for BostonData3 we can expect that Lasso regression will perform much better because we know that 500 features have a coefficient of zero.
-* Do results agree with expectations
+* Results compared to expectations
     + The full model had worse performance than some of the other models, but it did not perform as poorly as expected in comparison to the other models.
     + Our expectation that Lasso regression performs better than Ridge regression for the BostonData3 dataset held true. 
-* Do Ridge and PCR perform similarly?
+* Performance similarity between Ridge and Lasso
     + We would expect Ridge and PCR to perform similarly as both models penalize the features in which multicollinearity occurs. Per 'Elements of Statistical Learning': "Ridge regression shrinks the regression coefficients of the principal components... Principal componenet regression truncates them." In practice, Ridge performs better than PCR.We see this is the case for BostonData3, though they have similar performance for BostonData2. 
-* Changes in rank/gap from BostonData2 to BostonData3
+* Changes in rank/gap between data sets 
     + We see a drop in performance for the results between BostonData2 and BostonData3. This makes sense, as additional noise has been introduced that impacts the regression models. We would expect that this additional noise would lead to worse performance as some variables may have spurious correlations in the train data which could lead to the feature coefficients not being sufficiently penalized or removed by the regression models, which would then lead to worse performance on the testing data. This impact is especially profound for those models which can only penalize coefficients (such as Ridge) but not remove them (such as Lasso). 
 * Lasso performance across simulations
     + Lasso can zero out noise features, and achieves similar performance on BostonData2 and BostonData3. The performance on BostonData3 is slightly worse, which is to be expected since so much additional noise was introduced, but the performance did not decrease as significantly as it did for Ridge and PCR. 

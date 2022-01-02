@@ -1,5 +1,5 @@
 ---
-title: "PSL (S21) Coding Assignment 2"
+title: "PSL Coding Study 2"
 output:
   html_document:
     df_print: paged
@@ -10,16 +10,14 @@ output:
     toc: yes
     toc_depth: 2
     toc_float: yes
-date: "02/05/2021"
+date: "Fall 2021"
 ---
-# Team Members and Contributions (all MCS)
-Steve Su (steven36)
+# Authors
+Steve Su, Pierson Wodarz
 
-
-Pierson Wodarz (wodarz2)
-
-
-Steve completed Part I, while Pierson completed Part II. Both reviewed the work of each other for understanding, corrections, and potential improvements. Feedback was provided to each other over calls, while updates to the parts were made by the respective team members. 
+# Objective
+1) Implement coordinate descent algorithm in lasso penalization 
+2) Document performance differences between lasso and ridge penalization when performing regression on a reference data set versus reference data with added spurious predictors
 
 # Part I
 ## Load Data
@@ -477,7 +475,7 @@ MSPE
 
 ## Simulation
 ### BostonData2
-```{r}
+```{r, cache=TRUE}
 MSPE = matrix(nrow = T, ncol = 7)
 colnames(MSPE) = c("Full", "R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
 for(t in 1:T){
@@ -523,7 +521,7 @@ plot(cv.out)
 ridge.lambda.seq = test.lambda.seq
 ```
 
-```{r}
+```{r, cache=TRUE}
 MSPE = matrix(nrow = T, ncol = 6)
 colnames(MSPE) = c("R_min", "R_1se", "L_min", "L_1se", "L_Refit", "PCR")
 for(t in 1:T){
@@ -539,7 +537,7 @@ boxplot(MSPE)
 ```
 
 
-### Discussion
+## Summary
 
 * Expectations
     +  For BostonData2, 78 predictors are quadratic terms of the 12 numerical predictors, and pairwise interactions between the 12 numerical predictors. As such, some of the features may not have predictive power, or have a high correlation with other predictors. The same is true for BostonData3; especially so considering the inclusion of 500 noisy features, which we know have no predictive power.

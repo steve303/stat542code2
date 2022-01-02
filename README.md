@@ -1,3 +1,4 @@
+# Practical Statistical Learning - regularization, subselection, penalty methods  
 # Objectives
 1) Implement coordinate descent algorithm for lasso penalization using R, 
 2) Document performance differences between lasso and ridge penalization when performing regression on a reference data set versus reference data with added spurious predictors

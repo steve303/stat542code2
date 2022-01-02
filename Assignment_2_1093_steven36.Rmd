@@ -553,3 +553,7 @@ boxplot(MSPE)
     + We see a drop in performance for the results between BostonData2 and BostonData3. This makes sense, as additional noise has been introduced that impacts the regression models. We would expect that this additional noise would lead to worse performance as some variables may have spurious correlations in the train data which could lead to the feature coefficients not being sufficiently penalized or removed by the regression models, which would then lead to worse performance on the testing data. This impact is especially profound for those models which can only penalize coefficients (such as Ridge) but not remove them (such as Lasso). 
 * Lasso performance across simulations
     + Lasso can zero out noise features, and achieves similar performance on BostonData2 and BostonData3. The performance on BostonData3 is slightly worse, which is to be expected since so much additional noise was introduced, but the performance did not decrease as significantly as it did for Ridge and PCR. 
+    
+# Reference
+[link](https://steve303.github.io/stat542code2/coding2.pdf)
+    
